@@ -1,0 +1,156 @@
+<!DOCTYPE>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+	*{box-sizing:border-box;
+-moz-box-sizing:border-box; /* Firefox */
+-webkit-box-sizing:border-box}
+	.container{width: 400px;height: 300px;border: 1px solid lightblue;margin: 0 auto;}
+	.container .main{width: 70%;height:80%;float: left;border-right: 1px solid lightblue;overflow: scroll;}
+	.container .main .commonmsg{text-align: center;color: red;background-color: #f9f9f9;height: 50px;line-height: 50px;border-bottom: 1px solid lightblue;}
+	.container .main .smsg{text-align: right;padding: 5px;}
+	.container .onlineUsers{float: left;width: 29.8%;}
+	.container .msg{border-top: 1px solid lightblue;height: 20%;width: 100%;}
+	table[t_table]{width: 100%;border-collapse: collapse;}
+	table[t_table] thead{background-color: #eee;} 
+	table[t_table] thead tr{background-color: #eee;} 
+	table[t_table] thead tr th{padding: 2px;border: 1px solid #ccc;} 
+	table[t_table] tbody tr td{border: 1px solid #ccc;padding: 2px;}
+	table[t_table] tbody tr{color:black;}
+	table[t_table] tbody tr:nth-child(odd){background-color:#fff;}
+	table[t_table] tbody tr:nth-child(even){background-color: #f9f9f9;}
+	table[t_table] tbody tr:hover{cursor: pointer;background-color: rgba(0,0,0,.05);color:red;}
+</style>
+<title>Insert title here</title>
+<script type="text/javascript" src="${pageContext.request.contextPath }/js/jquery-2.1.1.js"></script>
+</head>
+<body>
+	<div class="container">
+		<h1 style="text-align: center;">当前用户：${username }</h1>
+		<div class="main">
+		</div>
+		<div class="onlineUsers">
+			<table t_table >
+				<thead>
+					<tr>
+						<th colspan="2" >在线用户列表</th>
+					</tr>
+				</thead>
+				<tbody id="onLineUsersTbody" style="overflow: scroll;">
+					
+				</tbody>
+			</table>
+		</div>
+		<div style="clear: both;"></div>
+		<div class="msg">
+			<div contenteditable="true" style="width: 80%;float: left;">
+				<textarea style="width: 100%;height: 100%;" id="sendMsg"></textarea>
+			</div>
+			<div style="float: left;height: 100%;width: 20%;">
+				<input type="button" value="发送" style="display: block;width: 100%;height: 100%;" id="send"/> 
+			</div>
+			<div style="clear: both;" id="send"></div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(function(){
+			var username = '${requestScope.username}',
+			    ws = null,
+				wsUrl = "ws://localhost:8080/study-websocket/chat/"+ username;
+			console.info(username);
+			var Chat = {
+				openConnection : function(){
+					if ('WebSocket' in window) {
+		            	ws = new WebSocket(wsUrl);
+		            } else if ('MozWebSocket' in window) {
+		                ws = new MozWebSocket(wsUrl);
+		            } else {
+		                alert('您的浏览器不支持websocket.');
+		                return;
+		            }
+					console.info("创建websocket对象成功.");
+					ws.onopen = function(){
+						console.info("websocket 连接打开.");
+					}
+					ws.onmessage = function(r){
+						console.info("后台返回的数据:");
+						console.info(r.data);
+						Chat.handleMsg(JSON.parse(r.data));
+					}
+					ws.onerror = function(e){
+						console.warn(e);
+						console.warn("websocket出现异常.");
+					}
+					ws.onclose = function(e){
+						console.info("websocket连接关闭.");
+					}
+				},
+				handleMsg : function(data){
+					var type = data.msgTypeEnum;
+					switch(type){
+						case "WELCOME":
+						case "LEAVE" :
+							Chat.handleWelcomeMsg(data);
+							break;
+						case "CHAT" :
+							Chat.handChatMsg(data);
+							break;
+						default : 
+							console.info("后台返回未知的消息类型.");
+							break;
+					}
+				},
+				handChatMsg : function(data){
+					console.warn(data);
+					$('<div />').addClass("chatmsg").html(data.msg.date+" -- " + data.msg.fromUser + "<br / >" + data.msg.msg).appendTo(".main");
+				},
+				handleWelcomeMsg : function(data){
+					// 1.处理在线用户
+					var users = data.users;
+					var trs = "";
+					users.forEach(function(user,i){
+						trs += "<tr>".concat("<td>").concat("<input type='checkbox' value='"+user+"' />").concat("</td>")
+						            .concat("<td>").concat(user).concat("</td>")
+						      .concat("</tr>");
+					});
+					$('#onLineUsersTbody').html(trs);
+					
+					// 2.处理消息
+					$('<div />').addClass("commonmsg").html(data.msg).appendTo(".main");
+				},
+				sendMsg : function(){
+					if(ws){
+						$('#send').off('click').on('click',function(){
+							var msg = $('#sendMsg').val();
+							var toUser = [];
+							$('#onLineUsersTbody').find(":checked").each(function(i,ele){
+								toUser.push($(ele).val());
+							});
+							if(msg){
+								var jsonMsg = {
+									msg : msg,
+									toUser : toUser.join(",")
+								};
+								ws.send(JSON.stringify(jsonMsg));
+								$('#sendMsg').val('');
+								Chat.addPageMsg(toUser,msg);
+							}
+						});
+					}else{
+						alert('连接服务器的websocket通道已经关闭.')
+					}
+				},
+				addPageMsg : function(toUser,msg){
+					if(toUser.length){
+						$('<div />').addClass("smsg").html(username + ":" +  msg).appendTo(".main");
+					}
+				}
+			};
+			
+			Chat.openConnection();
+			Chat.sendMsg();
+		});
+	</script>
+</body>
+</html></strong>
