@@ -17,7 +17,7 @@
 -->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>Apache Tomcat WebSocket Examples: Chat</title>
+    <title>Chat</title>
     <style type="text/css"><![CDATA[
         input#chat {
             width: 410px
@@ -60,7 +60,6 @@
             }
 
             Chat.socket.onopen = function () {
-                Console.log('Info: WebSocket connection opened.');
                 document.getElementById('chat').onkeydown = function(event) {
                     if (event.keyCode == 13) {
                         Chat.sendMessage();
@@ -80,9 +79,9 @@
 
         Chat.initialize = function() {
             if (window.location.protocol == 'http:') {
-                Chat.connect('ws://' + window.location.host + '/examples/websocket/chat');
+           Chat.connect('ws://' + window.location.host + '/mQQt/websocket/chat');
             } else {
-                Chat.connect('wss://' + window.location.host + '/examples/websocket/chat');
+                Chat.connect('wss://' + window.location.host + '/mQQt/websocket/chat');
             }
         };
 
@@ -118,6 +117,8 @@
                 noscripts[i].parentNode.removeChild(noscripts[i]);
             }
         }, false);
+        
+        
 
     ]]></script>
 </head>
@@ -126,7 +127,7 @@
     Javascript and reload this page!</h2></div>
 <div>
     <p>
-        <input type="text" placeholder="type and press enter to chat" id="chat" />
+        <input type="text" placeholder="按回车发送消息" id="chat" />
     </p>
     <div id="console-container">
         <div id="console"/>

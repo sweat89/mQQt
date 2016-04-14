@@ -31,6 +31,11 @@ import javax.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.ShardedJedisPool;
+import websocket.chat.constant.Names;
+import websocket.chat.util.RedisUtil;
+
 @ServerEndpoint(value = "/websocket/chat")
 public class ChatAnnotation {
 
@@ -44,21 +49,36 @@ public class ChatAnnotation {
     private Session session;
 
     public ChatAnnotation() {
-        nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
+        // nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
+        ShardedJedisPool pool = RedisUtil.getRedisPool();
+        ShardedJedis redis = pool.getResource();
+        String nickN = redis.spop("names");
+        if (nickN == null) {
+            String[] names = Names.names.split("，");
+            for (String name : names) {
+                redis.sadd("names", name);
+            }
+            nickname = redis.spop("names");
+        } else {
+            nickname = nickN;
+        }
+        pool.returnResource(redis);
+
     }
 
     @OnOpen
     public void start(Session session) {
+
         this.session = session;
         connections.add(this);
-        String message = String.format("* %s %s", nickname, "has joined.");
+        String message = String.format("* %s %s", nickname, "来到直播间...");
         broadcast(message);
     }
 
     @OnClose
     public void end() {
         connections.remove(this);
-        String message = String.format("* %s %s", nickname, "has disconnected.");
+        String message = String.format("* %s %s", nickname, "离开了房间");
         broadcast(message);
     }
 
