@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+	    http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<context:component-scan base-package="majiang.controller" />
+	<mvc:annotation-driven/>
+	<mvc:default-servlet-handler/>
+
+	<!--静态文件目录,该目录下存放css,images,js相关静态文件-->
+	<mvc:resources mapping="/App/**" location="/App/"/>
+
+	<!-- 错误路径和错误页面，注意指定viewResolver -->
+	<mvc:view-controller path="/404" view-name="view/error/404"/>
+	<mvc:view-controller path="/500" view-name="view/error/500"/>
+
+ 	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="true">
+			<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" p:supportedMediaTypes="*/*"/>
+		</mvc:message-converters>
+	</mvc:annotation-driven>   
+	
+	
+
+	<bean id="templateResolver" class="org.thymeleaf.templateresolver.ServletContextTemplateResolver">
+		<property name="characterEncoding" value="UTF-8"/>
+		<property name="prefix" value="/WEB-INF/html/"/>
+		<property name="suffix" value=".html"/>
+		<property name="templateMode" value="LEGACYHTML5"/>
+		<property name="cacheable" value="false"/>
+	</bean>
+
+	<bean id="templateEngine" class="org.thymeleaf.spring3.SpringTemplateEngine">
+		<property name="templateResolver" ref="templateResolver"/>
+	</bean>
+
+	<bean id="thymeleafViewResolver" class="org.thymeleaf.spring3.view.ThymeleafViewResolver">
+		<property name="templateEngine" ref="templateEngine"/>
+		<property name="characterEncoding" value="UTF-8"/>
+	</bean>
+	
+
+
+</beans>

@@ -71,6 +71,7 @@ public class ChatAnnotation {
 
         this.session = session;
         connections.add(this);
+        String f = "";
         String message = String.format("* %s %s", nickname, "来到直播间...");
         broadcast(message);
     }

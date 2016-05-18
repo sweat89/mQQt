@@ -16,7 +16,9 @@
 
 	<!-- 扫描com.maizuo.service包下所有标注@Service的服务组件 -->
 	 <context:component-scan base-package="websocket.chat" /> 
-	
+		 <context:component-scan base-package="majiang.controller" /> 
+		 	 	<context:component-scan base-package="majiang.service" />
+		 	<context:component-scan base-package="majiang.redis" />
 <!-- 	<reg:zookeeper id="regCenter" serverLists="120.25.204.152:2181" namespace="dd-job" baseSleepTimeMilliseconds="1000" maxSleepTimeMilliseconds="3000" maxRetries="3" />
 
     配置作业
@@ -39,13 +41,12 @@
            <constructor-arg index="0" value="120.25.204.152"/>   
     <!-- <constructor-arg index="0" value="192.168.1.204"/>-->
          <constructor-arg index="1" value="6379"/>
-        <!--  <property name="password" value="123456"/>-->
         <!-- <property name="password" value="hyx123!" /> -->
     </bean>
 	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-        <property name="maxActive" value="500"/>
+      <!--   <property name="maxActive" value="500"/> -->
         <property name="maxIdle" value="200"/>
-        <property name="maxWait" value="1000"/>
+      <!--   <property name="maxWait" value="1000"/> -->
         <property name="testOnBorrow" value="true"/>
     </bean>
     

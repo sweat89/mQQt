@@ -1,28 +1,26 @@
-<html>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
 <body>
-<h2>Hello World!</h2>
-
-	<div id="console-container">
-		<div id="console" />
-	</div>
-	<input id="msg" type="text" />
-	<button type="submit" id="sendButton" onClick="postToServer()">Send!</button>
-	<button type="submit" id="sendButton" onClick="closeConnect()">End</button>
-
-
+   
 <script type="text/javascript">
+function postToServer() {
+	alert('a');
+	var vv= document.getElementById("msg").value;
+	ws.send(vv);
+	document.getElementById("msg").value = "";
+}
  	var ws = new WebSocket("ws://localhost:8081/mQQt/websocket/chat");
 	ws.onopen = function() {
 	};
 	ws.onmessage = function(message) {
 		document.getElementById("console").textContent += message.data ;
 	} 
-	function postToServer() {
-		alert('a');
-		var vv= document.getElementById("msg").value;
-		ws.send(vv);
-		document.getElementById("msg").value = "";
-	}
+
 	function closeConnect() {
 		ws.close();
 	}
@@ -51,5 +49,11 @@
             margin: 0;
         }
     ]]></style>
-</body>
+    
+	<div id="console-container">
+		<div id="console" />
+	</div>
+	<input id="msg" type="text" />
+	<button type="submit" id="sendButton" onClick="postToServer()">Send!</button>
+	<button type="submit" id="sendButton" onClick="closeConnect()">End</button>
 </html>
